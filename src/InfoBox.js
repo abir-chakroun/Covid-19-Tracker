@@ -1,4 +1,6 @@
 import React from "react";
+import PropTypes from "prop-types";
+
 import { Card, CardContent } from "@material-ui/core";
 
 function InfoBox({ title, cases, total }) {
@@ -12,5 +14,11 @@ function InfoBox({ title, cases, total }) {
     </Card>
   );
 }
+
+InfoBox.propTypes = {
+  title: PropTypes.string.isRequired,
+  cases: PropTypes.number.isRequired,
+  total: PropTypes.number.isRequired,
+};
 
 export default InfoBox;
