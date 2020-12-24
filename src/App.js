@@ -1,9 +1,6 @@
-/* eslint-disable no-console */
 import { Card, CardContent } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
+import { TileLayer, MapContainer, Marker } from "react-leaflet";
 import "./App.css";
 import InfoBox from "./InfoBox";
 import Map from "./Map";
@@ -11,21 +8,32 @@ import Table from "./Table";
 import sortData from "./util";
 import Graph from "./Graph";
 import "leaflet/dist/leaflet.css";
+/* display marker on Map */
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import L from "leaflet";
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 function App() {
   const [countries, setCountries] = useState([]);
-  const [country, setCountry] = useState("");
+  const [country, setCountry] = useState("Worldwide");
   const [countryDetails, setCountryDetails] = useState({});
   const [tableData, setTableData] = useState([]);
-  const [mapCenter, setMapCenter] = useState({ lat: 34.80746, lng: -40.4796 });
+  const [mapCenter, setMapCenter] = useState([34.80746, -40.4796]);
   const [mapZoom, setMapZoom] = useState(3);
+  const [mapCountries, setMapCountries] = useState([]);
+  const [type, setType] = useState("cases");
+
   useEffect(() => {
     async function fetchData() {
       await fetch("https://disease.sh/v3/covid-19/all")
         .then((response) => response.json())
         .then((data) => {
           setCountryDetails(data);
-          setCountry("Worldwide");
         });
     }
     fetchData();
@@ -36,12 +44,13 @@ function App() {
       await fetch("https://disease.sh/v3/covid-19/countries")
         .then((response) => response.json())
         .then((data) => {
-          const contries = data.map((item) => ({
+          const structredCountries = data.map((item) => ({
             id: item.countryInfo.id,
             name: item.country,
             value: item.countryInfo.iso2,
           }));
-          setCountries(contries);
+          setCountries(structredCountries);
+          setMapCountries(data);
           const sortedData = sortData(data);
           setTableData(sortedData);
         })
@@ -52,6 +61,7 @@ function App() {
 
   const handleChange = async (event) => {
     setCountry(event.target.value);
+    console.log(event.target.value);
     const endpoint =
       event.target.value === "Worldwide"
         ? "v3/covid-19/all"
@@ -60,66 +70,107 @@ function App() {
       .then((data) => data.json())
       .then((countryData) => {
         setCountryDetails(countryData);
-        setMapCenter([
-          countryData.countryInfo.lat,
-          countryData.countryInfo.long,
-        ]);
-        setMapZoom(4);
+        if (event.target.value === "Worldwide") {
+          setMapCenter([34.80746, -40.4796]);
+          setMapZoom(3);
+        } else {
+          setMapCenter([
+            countryData.countryInfo.lat,
+            countryData.countryInfo.long,
+          ]);
+          setMapZoom(4);
+        }
       });
   };
 
   return (
     <div className="app">
-      <div className="app__leftContainer">
-        <div className="header">
-          <h1 className="header__title"> COVID-19 Tracker</h1>
-          <FormControl className="header__dropdown">
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={country}
-              variant="outlined"
-              onChange={handleChange}
-            >
-              <MenuItem value="Worldwide"> Worldwide </MenuItem>
-              {countries.map((item) => (
-                <MenuItem key={item.id} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+      <div className="header">
+        <h1 className="header__title"> COVID-19 Tracker</h1>
+        <div className="header__dropdown">
+          <select value={country} onChange={handleChange}>
+            <option value="Worldwide"> Worldwide </option>
+            {countries.map((item) => (
+              <option key={item._id} value={item.value}>
+                {item.name}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="app_statsInfo">
-          <InfoBox
-            title="Coronavirus cases"
-            cases={countryDetails.todayCases}
-            total={countryDetails.cases}
-          />
-          <InfoBox
-            title="Recovered"
-            cases={countryDetails.todayrecovered}
-            total={countryDetails.recovered}
-          />
-          <InfoBox
-            title="Deaths"
-            cases={countryDetails.todayDeaths}
-            total={countryDetails.deaths}
-          />
-        </div>
-        <Map center={mapCenter} zoom={mapZoom} />
       </div>
 
-      <Card className="app__rightContainer">
+      <div className="app__content__container">
+        <div className="app__leftContainer">
+          {mapCountries?.length > 0 && (
+            <div className="map">
+              <MapContainer zoom={mapZoom} center={mapCenter}>
+                <TileLayer
+                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Map
+                  center={mapCenter}
+                  zoom={mapZoom}
+                  countries={mapCountries}
+                  type={type}
+                />
+                {country !== "Worldwide" && (
+                  <Marker position={mapCenter}> </Marker>
+                )}
+              </MapContainer>
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="app_statsInfo">
+            <div
+              onClick={() => {
+                setType("cases");
+              }}
+            >
+              <InfoBox
+                title="Coronavirus cases"
+                cases={countryDetails.todayCases}
+                total={countryDetails.cases}
+                type="cases"
+              />
+            </div>
+            <div
+              onClick={() => {
+                setType("recovered");
+              }}
+            >
+              {" "}
+              <InfoBox
+                title="Recovered"
+                cases={countryDetails.todayRecovered}
+                total={countryDetails.recovered}
+                type="recovered"
+              />
+            </div>
+            <div
+              onClick={() => {
+                setType("deaths");
+              }}
+            >
+              <InfoBox
+                title="Deaths"
+                cases={countryDetails.todayDeaths}
+                total={countryDetails.deaths}
+                type="deaths"
+              />
+            </div>
+          </div>
+          <Graph casesType="cases" />
+        </div>
+      </div>
+      <Card>
         <CardContent>
           <h3>Live cases by Country</h3>
           <Table countries={tableData} />
           <h3>Live cases worldwide</h3>
-          <Graph casesType="cases" />
         </CardContent>
       </Card>
-
-      {/* graph */}
     </div>
   );
 }
