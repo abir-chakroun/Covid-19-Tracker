@@ -91,7 +91,7 @@ function App() {
           <select value={country} onChange={handleChange}>
             <option value="Worldwide"> Worldwide </option>
             {countries.map((item) => (
-              <option key={item._id} value={item.value}>
+              <option key={item._id} value={item.name}>
                 {item.name}
               </option>
             ))}
@@ -161,7 +161,7 @@ function App() {
               />
             </div>
           </div>
-          <Graph casesType="cases" />
+          <Graph country={country} casesType={type} />
         </div>
       </div>
       <Card>

@@ -13,6 +13,7 @@ body {
 .app__content__container {
   display: flex;
   justify-content: space-evenly;
+  align-items: center;
 }
 .header {
   display: flex;
@@ -38,7 +39,6 @@ body {
 .infoBox {
   height: 100px;
   width: 180px;
-  margin: 10px 0;
   cursor: pointer;
 }
 
@@ -86,7 +86,6 @@ body {
 
 .app_statsInfo__right {
   flex: 0.1;
-  margin-left: 20px;
 }
 @media (max-width: 990px) {
   .app {

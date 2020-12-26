@@ -1,15 +1,9 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable guard-for-in */
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable object-shorthand */
-/* eslint-disable no-undef */
-/* eslint-disable func-names */
-/* eslint-disable prefer-const */
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Line } from "react-chartjs-2";
 import numeral from "numeral";
-
+import "./Graph.css";
+import Card from "@material-ui/core/Card";
 const options = {
   legend: {
     display: false,
@@ -25,7 +19,7 @@ const options = {
     intersect: false,
     callbacks: {
       label: function (tooltipItem) {
-        return numeral(tooltipItem.value).format("+0,0");
+        return numeral(tooltipItem.value).format("0,0");
       },
     },
   },
@@ -33,6 +27,7 @@ const options = {
     xAxes: [
       {
         type: "time",
+        distribution: "series",
         time: {
           format: "MM/DD/YY",
           tooltipFormat: "ll",
@@ -45,9 +40,9 @@ const options = {
           display: false,
         },
         ticks: {
-          // Include a dollar sign in the ticks
           callback: function (value) {
-            return numeral(value).format("0a");
+            if (value % 1000000 === 0) return numeral(value).format("0a");
+            else return numeral(value).format("0.0a");
           },
         },
       },
@@ -55,59 +50,77 @@ const options = {
   },
 };
 const buildChartData = (data, casesType) => {
+  /* extract the difference to display in tooltips */
   let chartData = [];
-  let lastDataPoint = 0;
-  const appendItem =
+  const filteredData =
     casesType === "cases"
       ? data.cases
       : casesType === "recovered"
       ? data.recovered
       : data.deaths;
-
-  // eslint-disable-next-line guard-for-in
-  // eslint-disable-next-line no-restricted-syntax
-  for (let date in appendItem) {
-    if (lastDataPoint) {
-      const newDataPoint = {
-        x: date,
-        y: appendItem[date] - lastDataPoint,
-      };
-      chartData.push(newDataPoint);
-    }
-    lastDataPoint = appendItem[date] - lastDataPoint;
+  for (let date in filteredData) {
+    const newDataPoint = {
+      x: date,
+      y: filteredData[date],
+    };
+    chartData.push(newDataPoint);
   }
   return chartData;
 };
 
-function Graph({ casesType }) {
+function Graph({ country, casesType }) {
   const [lineData, setlineData] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
-      await fetch("https://disease.sh/v3/covid-19/historical/all?lastdays=120")
+      const endpoint =
+        country === "Worldwide"
+          ? "v3/covid-19/historical/all?lastdays=62"
+          : `v3/covid-19/historical/${country}`;
+      await fetch(`https://disease.sh/${endpoint}`)
         .then((response) => response.json())
         .then((data) => {
-          const chartData = buildChartData(data, casesType);
+          console.log(country, data);
+          const timelineData = country === "Worldwide" ? data : data.timeline;
+          const chartData = buildChartData(timelineData, casesType);
           setlineData(chartData);
         });
     }
     fetchData();
-  }, [casesType]);
+  }, [casesType, country]);
+  console.log(lineData);
   return (
     <div>
       {lineData?.length > 0 && (
-        <Line
-          options={options}
-          data={{
-            datasets: [
-              {
-                backgroundColor: "rgba(204, 16, 52, 0.5",
-                borderColor: "#CC1034",
-                data: lineData,
-              },
-            ],
-          }}
-        />
+        <Card className="linegraph">
+          <h2>
+            Coronavirus cases{" "}
+            {country === "Worldwide" ? "Worldwide" : `in ${country}`} in the
+            last {"2 months"}
+          </h2>
+          <Line
+            options={options}
+            data={{
+              datasets: [
+                {
+                  backgroundColor:
+                    casesType === "deaths"
+                      ? "rgba(226, 8, 8, 0.5)"
+                      : casesType === "recovered"
+                      ? "rgba(80, 201, 100, 0.5)"
+                      : "rgba(89, 87, 201, 0.5)",
+                  borderColor:
+                    casesType === "deaths"
+                      ? "rgba(226, 8, 8)"
+                      : casesType === "recovered"
+                      ? "rgba(80, 201, 100)"
+                      : "rgba(89, 87, 201)",
+                  data: lineData,
+                },
+              ],
+            }}
+          />
+        </Card>
       )}
     </div>
   );
