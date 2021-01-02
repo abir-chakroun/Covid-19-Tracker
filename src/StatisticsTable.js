@@ -329,7 +329,7 @@ function StatisticsTable({ countries }) {
               </TableRow>
             ))}
           </TableBody>
-          <TableFooter>
+          <TableFooter style={{ overflowX: "auto", width: "100%" }}>
             <TableRow>
               <TablePagination
                 rowsPerPagelis={[10, 25, 50]}

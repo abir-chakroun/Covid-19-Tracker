@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-
+import numeral from "numeral";
 import { Card, CardContent } from "@material-ui/core";
 
 function InfoBox({ title, cases, total, type }) {
@@ -8,8 +8,11 @@ function InfoBox({ title, cases, total, type }) {
     <Card className={`infoBox infoBox__${type}`}>
       <CardContent>
         <h5 className={`infoBox__title__${type}`}> {title} </h5>
-        <p> {cases} Today </p>
-        <p> {total} Total </p>
+        <p>
+          {" "}
+          <strong> + {numeral(cases).format("0a")} </strong>{" "}
+        </p>
+        <p> {numeral(total).format("0,0")} Total </p>
       </CardContent>
     </Card>
   );

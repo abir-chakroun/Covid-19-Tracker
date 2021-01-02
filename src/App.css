@@ -12,7 +12,7 @@ body {
   position: relative;
 }
 .app {
-  padding: 20px 20px 40px;
+  padding: 20px 20px;
 }
 .app__content__container {
   display: flex;
@@ -41,14 +41,15 @@ body {
 }
 
 .infoBox {
-  height: 100px;
-  width: 180px;
+  height: 130px;
+  width: 200px;
   cursor: pointer;
 }
 
 .infoBox p {
-  font-size: 13px;
+  font-size: 16px;
   margin: 5px 0;
+  font-weight: 500;
 }
 
 .infoBox__cases {
@@ -66,15 +67,15 @@ body {
 
 .infoBox__title__cases {
   color: #5957c9;
-  font-size: 16px;
+  font-size: 18px;
 }
 .infoBox__title__recovered {
   color: #50c964;
-  font-size: 16px;
+  font-size: 18px;
 }
 .infoBox__title__deaths {
   color: #e20808;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .app_statsInfo {
