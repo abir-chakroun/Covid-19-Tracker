@@ -25,6 +25,7 @@ function App() {
   const [mapZoom, setMapZoom] = useState(3);
   const [mapCountries, setMapCountries] = useState([]);
   const [type, setType] = useState("cases");
+  const [selected, setSelected] = useState("cases");
 
   useEffect(() => {
     async function fetchData() {
@@ -129,6 +130,7 @@ function App() {
               <div
                 onClick={() => {
                   setType("cases");
+                  setSelected("cases");
                 }}
               >
                 <InfoBox
@@ -136,11 +138,13 @@ function App() {
                   cases={countryDetails.todayCases}
                   total={countryDetails.cases}
                   type="cases"
+                  selected={selected}
                 />
               </div>
               <div
                 onClick={() => {
                   setType("recovered");
+                  setSelected("recovered");
                 }}
               >
                 {" "}
@@ -149,11 +153,13 @@ function App() {
                   cases={countryDetails.todayRecovered}
                   total={countryDetails.recovered}
                   type="recovered"
+                  selected={selected}
                 />
               </div>
               <div
                 onClick={() => {
                   setType("deaths");
+                  setSelected("deaths");
                 }}
               >
                 <InfoBox
@@ -161,6 +167,7 @@ function App() {
                   cases={countryDetails.todayDeaths}
                   total={countryDetails.deaths}
                   type="deaths"
+                  selected={selected}
                 />
               </div>
             </div>

@@ -1,11 +1,12 @@
 .linegraph {
-  padding: 10px;
+  padding: 5px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   margin: 20px auto 0;
-  min-height: 300px;
+  min-height: 320px;
+  max-width: 520px;
 }
 
 .linegraph h2 {
@@ -15,6 +16,6 @@
 }
 
 canvas.chartjs-render-monitor {
-  max-width: 550px;
+  max-width: 500px;
   max-height: 300px;
 }

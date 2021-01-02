@@ -2,15 +2,25 @@ import React from "react";
 import PropTypes from "prop-types";
 import numeral from "numeral";
 import { Card, CardContent } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
-function InfoBox({ title, cases, total, type }) {
+const useStyles = makeStyles({
+  root: {
+    padding: "8px",
+  },
+});
+function InfoBox({ title, cases, total, type, selected }) {
+  const classes = useStyles();
   return (
-    <Card className={`infoBox infoBox__${type}`}>
-      <CardContent>
+    <Card
+      className={selected === type ? `infoBox infoBox__${type}` : "infoBox"}
+      classes={{ root: classes.root }}
+    >
+      <CardContent classes={{ root: classes.root }}>
         <h5 className={`infoBox__title__${type}`}> {title} </h5>
         <p>
           {" "}
-          <strong> + {numeral(cases).format("0a")} </strong>{" "}
+          <strong> + {numeral(cases).format("0a")} Today </strong>{" "}
         </p>
         <p> {numeral(total).format("0,0")} Total </p>
       </CardContent>
@@ -23,6 +33,7 @@ InfoBox.propTypes = {
   type: PropTypes.string,
   cases: PropTypes.number,
   total: PropTypes.number,
+  selected: PropTypes.string,
 };
 
 export default InfoBox;

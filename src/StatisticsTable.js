@@ -22,6 +22,7 @@ import axios from "axios";
 const useStyles = makeStyles({
   root: {
     marginTop: "30px",
+    overflow: "hidden",
   },
   centerText: {
     textAlign: "center",
@@ -38,7 +39,7 @@ const useStyles = makeStyles({
     color: "#797979",
   },
   tableContainer: {
-    marginBottom: "40px",
+    width: "100%",
   },
 });
 
@@ -329,7 +330,7 @@ function StatisticsTable({ countries }) {
               </TableRow>
             ))}
           </TableBody>
-          <TableFooter style={{ overflowX: "auto", width: "100%" }}>
+          <TableFooter>
             <TableRow>
               <TablePagination
                 rowsPerPagelis={[10, 25, 50]}
@@ -341,6 +342,7 @@ function StatisticsTable({ countries }) {
                   inputProps: { "aria-label": "rows per page" },
                   native: true,
                 }}
+                style={{ overflow: "hidden" }}
                 onChangePage={handleChangePage}
                 onChangeRowsPerPage={handleChangeRowsPerPage}
               />

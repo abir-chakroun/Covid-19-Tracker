@@ -111,10 +111,6 @@ function Graph({ country, casesType }) {
             <Alert severity="info">{alert}</Alert>
           ) : (
             <Line
-              style={{
-                maxHeight: "300px",
-                maxWidth: "550px",
-              }}
               options={options}
               data={{
                 datasets: [
