@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
 import { Popup, CircleMarker, useMap } from "react-leaflet";
-import "./Map.css";
 import PropTypes from "prop-types";
-
+import "./Map.css";
 function Map({ center, zoom, countries, type }) {
   const map = useMap();
 

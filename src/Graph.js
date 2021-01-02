@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Line } from "react-chartjs-2";
+import { Alert } from "@material-ui/lab";
 import numeral from "numeral";
 import "./Graph.css";
 import Card from "@material-ui/core/Card";
+
 const options = {
   legend: {
     display: false,
@@ -70,8 +72,10 @@ const buildChartData = (data, casesType) => {
 
 function Graph({ country, casesType }) {
   const [lineData, setlineData] = useState([]);
+  const [alert, setAlert] = useState("");
 
   useEffect(() => {
+    setAlert("");
     async function fetchData() {
       const endpoint =
         country === "Worldwide"
@@ -80,15 +84,20 @@ function Graph({ country, casesType }) {
       await fetch(`https://disease.sh/${endpoint}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log(country, data);
-          const timelineData = country === "Worldwide" ? data : data.timeline;
-          const chartData = buildChartData(timelineData, casesType);
-          setlineData(chartData);
+          if (data.message) {
+            setAlert(data.message);
+          } else {
+            const timelineData =
+              country === "Worldwide" ? data : data?.timeline;
+
+            const chartData = buildChartData(timelineData, casesType);
+            setlineData(chartData);
+          }
         });
     }
     fetchData();
   }, [casesType, country]);
-  console.log(lineData);
+
   return (
     <div>
       {lineData?.length > 0 && (
@@ -98,28 +107,36 @@ function Graph({ country, casesType }) {
             {country === "Worldwide" ? "Worldwide" : `in ${country}`} in the
             last {"2 months"}
           </h2>
-          <Line
-            options={options}
-            data={{
-              datasets: [
-                {
-                  backgroundColor:
-                    casesType === "deaths"
-                      ? "rgba(226, 8, 8, 0.5)"
-                      : casesType === "recovered"
-                      ? "rgba(80, 201, 100, 0.5)"
-                      : "rgba(89, 87, 201, 0.5)",
-                  borderColor:
-                    casesType === "deaths"
-                      ? "rgba(226, 8, 8)"
-                      : casesType === "recovered"
-                      ? "rgba(80, 201, 100)"
-                      : "rgba(89, 87, 201)",
-                  data: lineData,
-                },
-              ],
-            }}
-          />
+          {alert.length > 0 ? (
+            <Alert severity="info">{alert}</Alert>
+          ) : (
+            <Line
+              style={{
+                maxHeight: "300px",
+                maxWidth: "550px",
+              }}
+              options={options}
+              data={{
+                datasets: [
+                  {
+                    backgroundColor:
+                      casesType === "deaths"
+                        ? "rgba(226, 8, 8, 0.5)"
+                        : casesType === "recovered"
+                        ? "rgba(80, 201, 100, 0.5)"
+                        : "rgba(89, 87, 201, 0.5)",
+                    borderColor:
+                      casesType === "deaths"
+                        ? "rgba(226, 8, 8)"
+                        : casesType === "recovered"
+                        ? "rgba(80, 201, 100)"
+                        : "rgba(89, 87, 201)",
+                    data: lineData,
+                  },
+                ],
+              }}
+            />
+          )}
         </Card>
       )}
     </div>
@@ -128,6 +145,7 @@ function Graph({ country, casesType }) {
 
 Graph.propTypes = {
   casesType: PropTypes.string.isRequired,
+  country: PropTypes.string.isRequired,
 };
 
 export default Graph;

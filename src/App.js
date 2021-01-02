@@ -1,11 +1,9 @@
-import { Card, CardContent } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { TileLayer, MapContainer, Marker } from "react-leaflet";
 import "./App.css";
 import InfoBox from "./InfoBox";
 import Map from "./Map";
-import Table from "./Table";
-import sortData from "./util";
+import StatisticsTable from "./StatisticsTable";
 import Graph from "./Graph";
 import "leaflet/dist/leaflet.css";
 /* display marker on Map */
@@ -51,8 +49,7 @@ function App() {
           }));
           setCountries(structredCountries);
           setMapCountries(data);
-          const sortedData = sortData(data);
-          setTableData(sortedData);
+          setTableData(data);
         })
         .catch((err) => console.log(err));
     }
@@ -61,7 +58,6 @@ function App() {
 
   const handleChange = async (event) => {
     setCountry(event.target.value);
-    console.log(event.target.value);
     const endpoint =
       event.target.value === "Worldwide"
         ? "v3/covid-19/all"
@@ -84,93 +80,99 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <div className="header">
-        <h1 className="header__title"> COVID-19 Tracker</h1>
-        <div className="header__dropdown">
-          <select value={country} onChange={handleChange}>
-            <option value="Worldwide"> Worldwide </option>
-            {countries.map((item) => (
-              <option key={item._id} value={item.name}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="app__content__container">
-        <div className="app__leftContainer">
-          {mapCountries?.length > 0 && (
-            <div className="map">
-              <MapContainer zoom={mapZoom} center={mapCenter}>
-                <TileLayer
-                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Map
-                  center={mapCenter}
-                  zoom={mapZoom}
-                  countries={mapCountries}
-                  type={type}
-                />
-                {country !== "Worldwide" && (
-                  <Marker position={mapCenter}> </Marker>
-                )}
-              </MapContainer>
-            </div>
-          )}
-        </div>
-        <div>
-          <div className="app_statsInfo">
-            <div
-              onClick={() => {
-                setType("cases");
-              }}
-            >
-              <InfoBox
-                title="Coronavirus cases"
-                cases={countryDetails.todayCases}
-                total={countryDetails.cases}
-                type="cases"
-              />
-            </div>
-            <div
-              onClick={() => {
-                setType("recovered");
-              }}
-            >
-              {" "}
-              <InfoBox
-                title="Recovered"
-                cases={countryDetails.todayRecovered}
-                total={countryDetails.recovered}
-                type="recovered"
-              />
-            </div>
-            <div
-              onClick={() => {
-                setType("deaths");
-              }}
-            >
-              <InfoBox
-                title="Deaths"
-                cases={countryDetails.todayDeaths}
-                total={countryDetails.deaths}
-                type="deaths"
-              />
-            </div>
+    <div>
+      <div className="app">
+        <div className="header">
+          <h1 className="header__title"> COVID-19 Tracker</h1>
+          <div className="header__dropdown">
+            <select value={country} onChange={handleChange}>
+              <option value="Worldwide"> Worldwide </option>
+              {countries.map((item) => (
+                <option key={item._id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
           </div>
-          <Graph country={country} casesType={type} />
         </div>
+
+        <div className="app__content__container">
+          <div className="app__leftContainer">
+            {mapCountries?.length > 0 && (
+              <div className="map">
+                <MapContainer
+                  zoom={mapZoom}
+                  center={mapCenter}
+                  scrollWheelZoom={false}
+                  minZoom={1}
+                  maxZoom={7}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Map
+                    center={mapCenter}
+                    zoom={mapZoom}
+                    countries={mapCountries}
+                    type={type}
+                  />
+                  {country !== "Worldwide" && (
+                    <Marker position={mapCenter}> </Marker>
+                  )}
+                </MapContainer>
+              </div>
+            )}
+          </div>
+          <div className="app__rightContainer">
+            <div className="app_statsInfo">
+              <div
+                onClick={() => {
+                  setType("cases");
+                }}
+              >
+                <InfoBox
+                  title="Coronavirus cases"
+                  cases={countryDetails.todayCases}
+                  total={countryDetails.cases}
+                  type="cases"
+                />
+              </div>
+              <div
+                onClick={() => {
+                  setType("recovered");
+                }}
+              >
+                {" "}
+                <InfoBox
+                  title="Recovered"
+                  cases={countryDetails.todayRecovered}
+                  total={countryDetails.recovered}
+                  type="recovered"
+                />
+              </div>
+              <div
+                onClick={() => {
+                  setType("deaths");
+                }}
+              >
+                <InfoBox
+                  title="Deaths"
+                  cases={countryDetails.todayDeaths}
+                  total={countryDetails.deaths}
+                  type="deaths"
+                />
+              </div>
+            </div>
+            <Graph country={country} casesType={type} />
+          </div>
+        </div>
+
+        <StatisticsTable countries={tableData} />
       </div>
-      <Card>
-        <CardContent>
-          <h3>Live cases by Country</h3>
-          <Table countries={tableData} />
-          <h3>Live cases worldwide</h3>
-        </CardContent>
-      </Card>
+      <div className="footer">
+        <p>&copy;{new Date().getFullYear()} Abir Chakroun</p>
+      </div>
     </div>
   );
 }
