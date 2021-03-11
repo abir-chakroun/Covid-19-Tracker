@@ -19,7 +19,7 @@ L.Marker.prototype.options.icon = DefaultIcon;
 function App() {
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("Worldwide");
-  const [countryDetails, setCountryDetails] = useState({});
+  const [countryDetails, setCountryDetails] = useState({ name: "Worldwide" });
   const [tableData, setTableData] = useState([]);
   const [mapCenter, setMapCenter] = useState([34.80746, -40.4796]);
   const [mapZoom, setMapZoom] = useState(3);
@@ -27,15 +27,24 @@ function App() {
   const [type, setType] = useState("cases");
   const [selected, setSelected] = useState("cases");
 
-  useEffect(() => {
-    async function fetchData() {
-      await fetch("https://disease.sh/v3/covid-19/all")
-        .then((response) => response.json())
-        .then((data) => {
-          setCountryDetails(data);
-        });
+  const fetchCountryDetails = async (target) => {
+    const endpoint = target === "Worldwide" ? "all" : `countries/${target}`;
+    const response = await fetch(`https://disease.sh/v3/covid-19/${endpoint}`);
+    const details = await response.json();
+
+    setCountryDetails({ ...details, name: target });
+
+    if (target === "Worldwide") {
+      setMapCenter([34.80746, -40.4796]);
+      setMapZoom(3);
+    } else {
+      setMapCenter([countryData.countryInfo.lat, countryData.countryInfo.long]);
+      setMapZoom(4);
     }
-    fetchData();
+  };
+
+  useEffect(() => {
+    fetchCountryDetails("Worldwide");
   }, []);
 
   useEffect(() => {
@@ -59,25 +68,7 @@ function App() {
 
   const handleChange = async (event) => {
     setCountry(event.target.value);
-    const endpoint =
-      event.target.value === "Worldwide"
-        ? "v3/covid-19/all"
-        : `v3/covid-19/countries/${event.target.value}`;
-    await fetch(`https://disease.sh/${endpoint}`)
-      .then((data) => data.json())
-      .then((countryData) => {
-        setCountryDetails(countryData);
-        if (event.target.value === "Worldwide") {
-          setMapCenter([34.80746, -40.4796]);
-          setMapZoom(3);
-        } else {
-          setMapCenter([
-            countryData.countryInfo.lat,
-            countryData.countryInfo.long,
-          ]);
-          setMapZoom(4);
-        }
-      });
+    await fetchCountryDetails(event.target.value);
   };
 
   return (
@@ -118,7 +109,7 @@ function App() {
                     countries={mapCountries}
                     type={type}
                   />
-                  {country !== "Worldwide" && (
+                  {countryDetails.name !== "Worldwide" && (
                     <Marker position={mapCenter}> </Marker>
                   )}
                 </MapContainer>
